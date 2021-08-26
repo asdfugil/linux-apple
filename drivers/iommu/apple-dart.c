@@ -681,6 +681,9 @@ static int apple_dart_attach_dev_identity(struct iommu_domain *domain,
 	if (!cfg->stream_maps[0].dart->supports_bypass)
 		return -EINVAL;
 
+	if (cfg->stream_maps[0].dart->locked)
+		return -EINVAL;
+
 	for_each_stream_map(i, cfg, stream_map)
 		apple_dart_hw_enable_bypass(stream_map);
 	return 0;
