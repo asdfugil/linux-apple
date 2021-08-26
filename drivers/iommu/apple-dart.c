@@ -941,6 +941,8 @@ static int apple_dart_def_domain_type(struct device *dev)
 		return IOMMU_DOMAIN_IDENTITY;
 	if (!cfg->stream_maps[0].dart->supports_bypass)
 		return IOMMU_DOMAIN_DMA;
+	if (cfg->stream_maps[0].dart->locked)
+		return IOMMU_DOMAIN_DMA;
 
 	return 0;
 }
