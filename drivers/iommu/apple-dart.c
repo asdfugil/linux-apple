@@ -1186,7 +1186,9 @@ static void apple_dart_remove(struct platform_device *pdev)
 {
 	struct apple_dart *dart = platform_get_drvdata(pdev);
 
-	apple_dart_hw_reset(dart);
+	if (!dart->locked)
+		apple_dart_hw_reset(dart);
+
 	free_irq(dart->irq, dart);
 
 	iommu_device_unregister(&dart->iommu);
@@ -1318,6 +1320,10 @@ static __maybe_unused int apple_dart_resume(struct device *dev)
 	struct apple_dart *dart = dev_get_drvdata(dev);
 	unsigned int sid, idx;
 	int ret;
+
+	/* Locked DARTs can't be restored, and they should not need it */
+	if (dart->locked)
+		return 0;
 
 	ret = apple_dart_hw_reset(dart);
 	if (ret) {
