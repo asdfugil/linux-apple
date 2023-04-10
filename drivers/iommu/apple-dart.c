@@ -21,6 +21,7 @@
 #include <linux/io-pgtable.h>
 #include <linux/iommu.h>
 #include <linux/iopoll.h>
+#include <linux/minmax.h>
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
@@ -226,6 +227,9 @@ struct apple_dart {
 	u32 locked : 1;
 	u32 four_level : 1;
 
+	dma_addr_t dma_min;
+	dma_addr_t dma_max;
+
 	struct iommu_group *sid2group[DART_MAX_STREAMS];
 	struct iommu_device iommu;
 
@@ -273,6 +277,7 @@ struct apple_dart_domain {
 	struct io_pgtable_ops *pgtbl_ops;
 
 	bool finalized;
+	u64 mask;
 	struct mutex init_lock;
 	struct apple_dart_atomic_stream_map stream_maps[MAX_DARTS_PER_DEVICE];
 
@@ -623,7 +628,7 @@ static phys_addr_t apple_dart_iova_to_phys(struct iommu_domain *domain,
 	if (!ops)
 		return 0;
 
-	return ops->iova_to_phys(ops, iova);
+	return ops->iova_to_phys(ops, iova & dart_domain->mask);
 }
 
 static int apple_dart_map_pages(struct iommu_domain *domain, unsigned long iova,
@@ -637,8 +642,8 @@ static int apple_dart_map_pages(struct iommu_domain *domain, unsigned long iova,
 	if (!ops)
 		return -ENODEV;
 
-	return ops->map_pages(ops, iova, paddr, pgsize, pgcount, prot, gfp,
-			      mapped);
+	return ops->map_pages(ops, iova & dart_domain->mask, paddr, pgsize,
+			      pgcount, prot, gfp, mapped);
 }
 
 static size_t apple_dart_unmap_pages(struct iommu_domain *domain,
@@ -649,7 +654,8 @@ static size_t apple_dart_unmap_pages(struct iommu_domain *domain,
 	struct apple_dart_domain *dart_domain = to_dart_domain(domain);
 	struct io_pgtable_ops *ops = dart_domain->pgtbl_ops;
 
-	return ops->unmap_pages(ops, iova, pgsize, pgcount, gather);
+	return ops->unmap_pages(ops, iova & dart_domain->mask, pgsize, pgcount,
+				gather);
 }
 
 static void
@@ -721,6 +727,8 @@ static int apple_dart_finalize_domain(struct apple_dart_domain *dart_domain,
 {
 	struct apple_dart *dart = cfg->stream_maps[0].dart;
 	struct io_pgtable_cfg pgtbl_cfg;
+	dma_addr_t dma_max = dart->dma_max;
+	u32 ias = min_t(u32, dart->ias, fls64(dma_max));
 	int ret = 0;
 	int i, j;
 
@@ -741,7 +749,7 @@ static int apple_dart_finalize_domain(struct apple_dart_domain *dart_domain,
 
 	pgtbl_cfg = (struct io_pgtable_cfg){
 		.pgsize_bitmap = dart->pgsize,
-		.ias = dart->ias,
+		.ias = ias,
 		.oas = dart->oas,
 		.coherent_walk = 1,
 		.iommu_dev = dart->dev,
@@ -764,13 +772,21 @@ static int apple_dart_finalize_domain(struct apple_dart_domain *dart_domain,
 		/* If the DART is locked, we need to keep the translation level count. */
 		if (dart->hw->tcr_4level && dart->ias > 36) {
 			if (readl(dart->regs + DART_TCR(dart, sid)) & dart->hw->tcr_4level) {
-				if (dart->ias < 37) {
+				if (ias < 37) {
 					dev_info(dart->dev, "Expanded to ias=37 due to lock\n");
 					pgtbl_cfg.ias = 37;
 				}
-			} else if (dart->ias > 36) {
+			} else if (ias > 36) {
 				dev_info(dart->dev, "Limited to ias=36 due to lock\n");
 				pgtbl_cfg.ias = 36;
+				if (dart->dma_min == 0 && dma_max == DMA_BIT_MASK(dart->ias)) {
+					dma_max = DMA_BIT_MASK(pgtbl_cfg.ias);
+				} else if ((dart->dma_min ^ dma_max) & ~DMA_BIT_MASK(36)) {
+					dev_err(dart->dev,
+						"Invalid DMA range for locked 3-level PT\n");
+					ret = -ENOMEM;
+					goto done;
+				}
 			}
 		}
 	}
@@ -782,10 +798,16 @@ static int apple_dart_finalize_domain(struct apple_dart_domain *dart_domain,
 		goto done;
 	}
 
+	if (pgtbl_cfg.pgsize_bitmap == SZ_4K)
+		dart_domain->mask = DMA_BIT_MASK(min_t(u32, dart->ias, 32));
+	else if (pgtbl_cfg.apple_dart_cfg.n_levels == 3)
+		dart_domain->mask = DMA_BIT_MASK(min_t(u32, dart->ias, 36));
+	else if (pgtbl_cfg.apple_dart_cfg.n_levels == 4)
+		dart_domain->mask = DMA_BIT_MASK(min_t(u32, dart->ias, 47));
+
 	dart_domain->domain.pgsize_bitmap = pgtbl_cfg.pgsize_bitmap;
-	dart_domain->domain.geometry.aperture_start = 0;
-	dart_domain->domain.geometry.aperture_end =
-		(dma_addr_t)DMA_BIT_MASK(pgtbl_cfg.ias);
+	dart_domain->domain.geometry.aperture_start = dart->dma_min;
+	dart_domain->domain.geometry.aperture_end = dma_max;
 	dart_domain->domain.geometry.force_aperture = true;
 
 	dart_domain->finalized = true;
@@ -1298,6 +1320,7 @@ static int apple_dart_probe(struct platform_device *pdev)
 	struct resource *res;
 	struct apple_dart *dart;
 	struct device *dev = &pdev->dev;
+	u64 dma_range[2];
 
 	dart = devm_kzalloc(dev, sizeof(*dart), GFP_KERNEL);
 	if (!dart)
@@ -1358,6 +1381,26 @@ static int apple_dart_probe(struct platform_device *pdev)
 		dart->num_streams = FIELD_GET(DART_T8110_PARAMS4_NUM_SIDS, dart_params[3]);
 		dart->four_level = dart->ias > 36;
 		break;
+	}
+
+	dart->dma_min = 0;
+	dart->dma_max = DMA_BIT_MASK(dart->ias);
+
+	ret = of_property_read_u64_array(dev->of_node, "apple,dma-range", dma_range, 2);
+	if (ret == -EINVAL) {
+		ret = 0;
+	} else if (ret) {
+		goto err_clk_disable;
+	} else {
+		dart->dma_min = dma_range[0];
+		dart->dma_max = dma_range[0] + dma_range[1] - 1;
+		if ((dart->dma_min ^ dart->dma_max) & ~DMA_BIT_MASK(dart->ias)) {
+			dev_err(&pdev->dev, "Invalid DMA range for ias=%d\n",
+				dart->ias);
+			goto err_clk_disable;
+		}
+		dev_info(&pdev->dev, "Limiting DMA range to %pad..%pad\n",
+			 &dart->dma_min, &dart->dma_max);
 	}
 
 	if (dart->num_streams > DART_MAX_STREAMS) {
