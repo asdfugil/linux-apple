@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
+#include <linux/anon_inodes.h>
 #include <linux/dma-mapping.h>
 #include <linux/io.h>
 #include <linux/iopoll.h>
+#include <linux/file.h>
 #include <linux/of.h>
 #include <linux/platform_device.h>
+#include <linux/types.h>
+
+#include <asm/current.h>
+
 #include <drm/drm_atomic.h>
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_damage_helper.h>
@@ -12,6 +18,7 @@
 #include <drm/drm_drv.h>
 #include <drm/drm_edid.h>
 #include <drm/drm_fb_dma_helper.h>
+#include <drm/drm_file.h>
 #include <drm/drm_framebuffer.h>
 #include <drm/drm_gem_atomic_helper.h>
 #include <drm/drm_gem_dma_helper.h>
@@ -72,7 +79,33 @@
 #define GEN_RD_CMD_BUSY BIT(6)
 #define CMD_PKT_STATUS_TIMEOUT_US 20000
 
-DEFINE_DRM_GEM_DMA_FOPS(adp_fops);
+static int adp_open(struct inode *inode, struct file *filp)
+{
+	/*
+	 * The modesetting driver does not check the non-desktop connector
+	 * property and keeps the device open and locked. If the touchbar daemon
+	 * opens the device first modesetting breaks the whole X session.
+	 * Simply refuse to open the device for X11 server processes as
+	 * workaround.
+	 */
+	if (current->comm[0] == 'X')
+		return -EBUSY;
+
+	return drm_open(inode, filp);
+}
+
+static const struct file_operations adp_fops = {
+	.owner          = THIS_MODULE,
+	.open           = adp_open,
+	.release        = drm_release,
+	.unlocked_ioctl = drm_ioctl,
+	.compat_ioctl   = drm_compat_ioctl,
+	.poll           = drm_poll,
+	.read           = drm_read,
+	.llseek         = noop_llseek,
+	.mmap           = drm_gem_mmap,
+	DRM_GEM_DMA_UNMAPPED_AREA_FOPS
+};
 
 static int adp_drm_gem_dumb_create(struct drm_file *file_priv,
 					struct drm_device *drm,
