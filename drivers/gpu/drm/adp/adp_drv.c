@@ -35,6 +35,8 @@
 #define ADP_CTRL_VBLANK_ON 0x12
 #define ADP_CTRL_FIFO_ON 0x601
 #define ADP_SCREEN_SIZE 0x0c
+#define ADP_SCREEN_HSIZE GENMASK(15, 0)
+#define ADP_SCREEN_VSIZE GENMASK(31, 16)
 
 #define ADBE_FIFO 0x10c0
 #define ADBE_FIFO_SYNC 0xc0000000
@@ -415,8 +417,8 @@ static int adp_get_modes(struct drm_connector *connector)
 	size = readl(adp->fe + ADP_SCREEN_SIZE);
 	mode = drm_mode_create(connector->dev);
 
-	mode->vdisplay = size >> 16;
-	mode->hdisplay = size & 0xFFFF;
+	mode->vdisplay = FIELD_GET(ADP_SCREEN_VSIZE, size);
+	mode->hdisplay = FIELD_GET(ADP_SCREEN_HSIZE, size);
 	mode->hsync_start = mode->hdisplay + 8;
 	mode->hsync_end = mode->hsync_start + 80;
 	mode->htotal = mode->hsync_end + 40;
@@ -464,15 +466,28 @@ static int adp_setup_mode_config(struct adp_drv_private *adp)
 {
 	struct drm_device *drm = &adp->drm;
 	int ret;
+	u32 size;
 
 	ret = drmm_mode_config_init(drm);
 	if (ret)
 		return ret;
 
+	/*
+	 * Query screen size restrict the frame buffer size to the screen size
+	 * aligned to the next multiple of 64. This is not necessary but can be
+	 * used as simple check for non-desktop devices.
+	 * Xorg's modesetting driver does not care about the connector
+	 * "non-desktop" property. The max frame buffer width or height can be
+	 * easily checked and a device can be reject if the max width/height is
+	 * smaller than 120 for example.
+	 * Any touchbar daemon is not limited by this small framebuffer size.
+	 */
+	size = readl(adp->fe + ADP_SCREEN_SIZE);
+
 	drm->mode_config.min_width = 32;
 	drm->mode_config.min_height = 32;
-	drm->mode_config.max_width = 16384;
-	drm->mode_config.max_height = 16384;
+	drm->mode_config.max_width = ALIGN(FIELD_GET(ADP_SCREEN_HSIZE, size), 64);
+	drm->mode_config.max_height = ALIGN(FIELD_GET(ADP_SCREEN_VSIZE, size), 64);
 	drm->mode_config.preferred_depth = 24;
 	drm->mode_config.prefer_shadow = 0;
 	drm->mode_config.funcs = &adp_mode_config_funcs;
