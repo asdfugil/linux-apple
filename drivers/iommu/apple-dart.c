@@ -949,7 +949,7 @@ static struct iommu_device *apple_dart_probe_device(struct device *dev)
 	struct apple_dart_stream_map *stream_map;
 	int i;
 
-	if (!cfg)
+	if (!dev_iommu_fwspec_get(dev) || !cfg)
 		return ERR_PTR(-ENODEV);
 
 	for_each_stream_map(i, cfg, stream_map)
