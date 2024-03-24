@@ -145,6 +145,8 @@ int of_iommu_configure(struct device *dev, struct device_node *master_np,
 		of_pci_check_device_ats(dev, master_np);
 	} else {
 		err = of_iommu_configure_device(master_np, dev, id);
+		if (err == -EPROBE_DEFER)
+			iommu_fwspec_free(dev);
 	}
 
 	if (err)
