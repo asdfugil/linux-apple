@@ -6,3 +6,22 @@
  */
 
 #include "t8010.dtsi"
+
+/ {
+	opp: opp-table-0 {
+		opp08 {
+			opp-hz = /bits/ 64 <1944000000>;
+			opp-level = <8>;
+		};
+
+		opp09 {
+			opp-hz = /bits/ 64 <2244000000>;
+			opp-level = <9>;
+		};
+
+		opp10 {
+			opp-hz = /bits/ 64 <2340000000>;
+			opp-level = <10>;
+		};
+	};
+};

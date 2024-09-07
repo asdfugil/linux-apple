@@ -50,6 +50,8 @@
 			compatible = "apple,hurricane-zephyr";
 			reg = <0x0 0x0>;
 			cpu-release-addr = <0 0>; /* To be filled by loader */
+			operating-points-v2 = <&opp>;
+			performance-domains = <&cpufreq>;
 			enable-method = "spin-table";
 			device_type = "cpu";
 		};
@@ -58,9 +60,61 @@
 			compatible = "apple,hurricane-zephyr";
 			reg = <0x0 0x1>;
 			cpu-release-addr = <0 0>; /* To be filled by loader */
+			operating-points-v2 = <&opp>;
+			performance-domains = <&cpufreq>;
 			enable-method = "spin-table";
 			device_type = "cpu";
 		};
+	};
+
+	opp: opp-table-0 {
+		compatible = "operating-points-v2";
+
+		/*
+		 * The E-core frequencies are adjusted so performance scales
+		 * linearly with reported clock speed.
+		 */
+
+		opp01 {
+			opp-hz = /bits/ 64 <149000000>; /* 396 MHz, E-core */
+			opp-level = <1>;
+		};
+
+		opp02 {
+			opp-hz = /bits/ 64 <275000000>; /* 732 MHz, E-core */
+			opp-level = <2>;
+		};
+
+		opp03 {
+			opp-hz = /bits/ 64 <410000000>; /* 1092 MHz, E-core */
+			opp-level = <3>;
+		};
+
+		/* The following operating points are handled by the P-cores */
+		opp04 {
+			opp-hz = /bits/ 64 <756000000>;
+			opp-level = <4>;
+		};
+
+		opp05 {
+			opp-hz = /bits/ 64 <1056000000>;
+			opp-level = <5>;
+		};
+
+		opp06 {
+			opp-hz = /bits/ 64 <1356000000>;
+			opp-level = <6>;
+		};
+
+		opp07 {
+			opp-hz = /bits/ 64 <1644000000>;
+			opp-level = <7>;
+		};
+
+		/*
+		 * The iPod Touch 7 supports up to 1.6 GHz, faster operating
+		 * points for other devices are in t8010-fast.dtsi
+		 */
 	};
 
 	memory@800000000 {
@@ -85,6 +139,12 @@
 		#size-cells = <2>;
 		nonposted-mmio;
 		ranges;
+
+		cpufreq: performance-controller@202f20000 {
+			compatible = "apple,t8010-cluster-cpufreq", "apple,t8103-cluster-cpufreq", "apple,cluster-cpufreq";
+			reg = <0x2 0x2f20000 0 0x1000>;
+			#performance-domain-cells = <0>;
+		};
 
 		serial0: serial@20a0c0000 {
 			compatible = "apple,s5l-uart";
