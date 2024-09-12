@@ -150,7 +150,7 @@ static int __init apple_cpuidle_init(void)
 		return 0;
 
 	if (!FIELD_GET(DEEP_WFI_STATE_RETENTION, read_sysreg(aidr_el1))) {
-		dev_info(&pdev->dev, "cpuidle unavailable CPU does not retain state in deep WFI\n");
+		pr_info("%s: CPU does not retain state in deep WFI, cpuidle unavailable\n", __func__);
 		return 0;
 	}
 

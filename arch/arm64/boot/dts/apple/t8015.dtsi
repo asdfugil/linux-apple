@@ -76,6 +76,8 @@
 			compatible = "apple,mistral";
 			reg = <0x0 0x0>;
 			cpu-release-addr = <0 0>; /* To be filled by loader */
+			operating-points-v2 = <&ecluster_opp>;
+			performance-domains = <&cpufreq_e>;
 			enable-method = "spin-table";
 			device_type = "cpu";
 		};
@@ -84,6 +86,8 @@
 			compatible = "apple,mistral";
 			reg = <0x0 0x1>;
 			cpu-release-addr = <0 0>; /* To be filled by loader */
+			operating-points-v2 = <&ecluster_opp>;
+			performance-domains = <&cpufreq_e>;
 			enable-method = "spin-table";
 			device_type = "cpu";
 		};
@@ -92,6 +96,8 @@
 			compatible = "apple,mistral";
 			reg = <0x0 0x2>;
 			cpu-release-addr = <0 0>; /* To be filled by loader */
+			operating-points-v2 = <&ecluster_opp>;
+			performance-domains = <&cpufreq_e>;
 			enable-method = "spin-table";
 			device_type = "cpu";
 		};
@@ -100,6 +106,8 @@
 			compatible = "apple,mistral";
 			reg = <0x0 0x3>;
 			cpu-release-addr = <0 0>; /* To be filled by loader */
+			operating-points-v2 = <&ecluster_opp>;
+			performance-domains = <&cpufreq_e>;
 			enable-method = "spin-table";
 			device_type = "cpu";
 		};
@@ -108,6 +116,8 @@
 			compatible = "apple,monsoon";
 			reg = <0x0 0x10004>;
 			cpu-release-addr = <0 0>; /* To be filled by loader */
+			operating-points-v2 = <&pcluster_opp>;
+			performance-domains = <&cpufreq_p>;
 			enable-method = "spin-table";
 			device_type = "cpu";
 		};
@@ -116,8 +126,29 @@
 			compatible = "apple,monsoon";
 			reg = <0x0 0x10005>;
 			cpu-release-addr = <0 0>; /* To be filled by loader */
+			operating-points-v2 = <&pcluster_opp>;
+			performance-domains = <&cpufreq_p>;
 			enable-method = "spin-table";
 			device_type = "cpu";
+		};
+	};
+
+        ecluster_opp: opp-table-0 {
+                compatible = "operating-points-v2";
+
+		opp01 {
+			opp-hz = /bits/ 64 <453000000>;
+			opp-level = <1>;
+		};
+
+		opp02 {
+			opp-hz = /bits/ 64 <672000000>;
+			opp-level = <2>;
+		};
+
+		opp03 {
+			opp-hz = /bits/ 64 <972000000>;
+			opp-level = <3>;
 		};
 	};
 
@@ -125,6 +156,25 @@
 		device_type = "memory";
 		/* To be filled in by the bootloader (based on XNU BootArgs). */
 		reg = <0x8 0 0 0>;
+	};
+
+        pcluster_opp: opp-table-1 {
+                compatible = "operating-points-v2";
+
+		opp01 {
+			opp-hz = /bits/ 64 <453000000>;
+			opp-level = <1>;
+		};
+
+		opp02 {
+			opp-hz = /bits/ 64 <852000000>;
+			opp-level = <2>;
+		};
+
+		opp03 {
+			opp-hz = /bits/ 64 <1332000000>;
+			opp-level = <3>;
+		};
 	};
 
 	reserved-memory {
@@ -144,6 +194,18 @@
 		#size-cells = <2>;
 		nonposted-mmio;
 		ranges;
+
+		cpufreq_e: performance-controller@208e20000 {
+			compatible = "apple,t8015-cluster-cpufreq", "apple,t8103-cluster-cpufreq", "apple,cluster-cpufreq";
+			reg = <0x2 0x08e20000 0 0x1000>;
+			#performance-domain-cells = <0>;
+		};
+
+		cpufreq_p: performance-controller@208ea0000 {
+			compatible = "apple,t8015-cluster-cpufreq", "apple,t8103-cluster-cpufreq", "apple,cluster-cpufreq";
+			reg = <0x2 0x08ea0000 0 0x1000>;
+			#performance-domain-cells = <0>;
+		};
 
 		serial0: serial@22e600000 {
 			compatible = "apple,s5l-uart";
