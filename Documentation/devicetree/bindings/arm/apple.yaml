@@ -26,6 +26,7 @@ description: |
   - iPad mini 4
   - iPod touch 6
   - Apple TV HD
+  - HomePod
 
   Device based on the "A8X" SoC:
 
@@ -136,12 +137,13 @@ properties:
       - description: Apple A8 SoC based platforms
         items:
           - enum:
-              - apple,j42d # Apple TV HD
-              - apple,j96  # iPad mini 4 (Wi-Fi)
-              - apple,j97  # iPad mini 4 (Cellular)
-              - apple,n56  # iPhone 6 Plus
-              - apple,n61  # iPhone 6
-              - apple,n102 # iPod touch 6
+              - apple,b238a # HomePod
+              - apple,j42d  # Apple TV HD
+              - apple,j96   # iPad mini 4 (Wi-Fi)
+              - apple,j97   # iPad mini 4 (Cellular)
+              - apple,n56   # iPhone 6 Plus
+              - apple,n61   # iPhone 6
+              - apple,n102  # iPod touch 6
           - const: apple,t7000
           - const: apple,arm-platform
 
