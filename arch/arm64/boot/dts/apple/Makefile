@@ -10,6 +10,7 @@ dtb-$(CONFIG_ARCH_APPLE) += s5l8960x-j85.dtb
 dtb-$(CONFIG_ARCH_APPLE) += s5l8960x-j86.dtb
 dtb-$(CONFIG_ARCH_APPLE) += s5l8960x-j87.dtb
 dtb-$(CONFIG_ARCH_APPLE) += s5l8960x-n51.dtb
+dtb-$(CONFIG_ARCH_APPLE) += t7000-b238a.dtb
 dtb-$(CONFIG_ARCH_APPLE) += t7000-j42d.dtb
 dtb-$(CONFIG_ARCH_APPLE) += t7000-j96.dtb
 dtb-$(CONFIG_ARCH_APPLE) += t7000-j97.dtb

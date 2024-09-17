@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Apple HomePod, B238a, AudioAccessory1,1 (A1639)
+ * Copyright (c) 2024, Nick Chan <towinchenmi@gmail.com>
+ */
+
+/dts-v1/;
+
+#include "t7000.dtsi"
+
+/ {
+	compatible = "apple,b238a", "apple,t7000", "apple,arm-platform";
+	model = "Apple HomePod";
+	chassis-type = "embedded";
+
+	chosen {
+		/* The HomePod does not have a display. */
+		/delete-node/ framebuffer@0;
+	};
+};
+
+&serial0 {
+	status = "okay";
+};
