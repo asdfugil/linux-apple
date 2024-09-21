@@ -257,6 +257,29 @@
 				power-domains = <&ps_usb2dev>;
 				dr_mode = "peripheral";
 			};
+
+			ehci0: usb-ehci@230200000 {
+				compatible = "apple,t8015-ehci", "generic-ehci";
+				reg = <0x2 0x30200000 0x0 0x10000>;
+				interrupts = <AIC_IRQ 319 IRQ_TYPE_LEVEL_HIGH>;
+				power-domains = <&ps_usb2host0>;
+			};
+
+			ohci0: usb-ohci@230300000 {
+				compatible = "apple,t8015-ohci", "generic-ohci";
+				reg = <0x2 0x30300000 0x0 0x10000>;
+				interrupts = <AIC_IRQ 320 IRQ_TYPE_LEVEL_HIGH>;
+				power-domains = <&ps_usb2host0_ohci>;
+				/* Have silicon bugs, workarounds needed */
+				status = "disabled";
+			};
+
+			ehci1: usb-ehci@230400000 {
+				compatible = "apple,t8015-ehci", "generic-ehci";
+				reg = <0x2 0x30400000 0x0 0x10000>;
+				interrupts = <AIC_IRQ 321 IRQ_TYPE_LEVEL_HIGH>;
+				power-domains = <&ps_usb2host1>;
+			};
 		};
 	};
 
