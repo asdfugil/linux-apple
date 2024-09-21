@@ -144,6 +144,29 @@
 		nonposted-mmio;
 		ranges;
 
+		display: display-pipe@218000000 {
+			compatible = "apple,t8015-display-pipe", "apple,h7-display-pipe";
+			reg-names = "be", "fe", "mipi";
+			reg = <0x2 0x18000000 0x0 0xc000>,
+				<0x2 0x18200000 0x0 0x4000>,
+				<0x2 0x18400000 0x0 0x100000>;
+			power-domains = <&ps_disp0_fe>, <&ps_disp0_be>, <&ps_mipi_dsi>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 217 IRQ_TYPE_LEVEL_HIGH>,
+				<AIC_IRQ 220 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "be", "fe";
+			//status = "disabled";
+			//iommus = <&displaydfr_dart 0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			panel: panel@0 {
+				compatible = "apple,summit";
+				reg = <0>;
+				max-brightness = <2047>;
+			};
+		};
+
 		serial0: serial@22e600000 {
 			compatible = "apple,s5l-uart";
 			reg = <0x2 0x2e600000 0x0 0x4000>;
