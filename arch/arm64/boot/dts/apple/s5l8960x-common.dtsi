@@ -12,6 +12,7 @@
 / {
 	aliases {
 		serial0 = &serial0;
+		framebuffer0 = &framebuffer0;
 	};
 
 	chosen {
