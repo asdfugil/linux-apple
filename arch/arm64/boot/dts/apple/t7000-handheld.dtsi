@@ -10,6 +10,10 @@
  */
 
 / {
+	aliases {
+		framebuffer0 = &framebuffer0;
+	};
+
 	chosen {
 		stdout-path = "serial0";
 
