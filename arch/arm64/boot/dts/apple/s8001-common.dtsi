@@ -12,6 +12,10 @@
 / {
 	aliases {
 		serial0 = &serial0;
+		ps_dcs4 = &ps_dcs4;
+		ps_dcs5 = &ps_dcs5;
+		ps_dcs6 = &ps_dcs6;
+		ps_dcs7 = &ps_dcs7;
 	};
 
 	chosen {
@@ -24,6 +28,7 @@
 		framebuffer0: framebuffer@0 {
 			compatible = "apple,simple-framebuffer", "simple-framebuffer";
 			reg = <0 0 0 0>; /* To be filled by loader */
+			power-domains = <&ps_disp0>, <&ps_dp0>;
 			/* Format properties will be added by loader */
 			status = "disabled";
 		};
