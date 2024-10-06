@@ -14,12 +14,15 @@
 #include <linux/mutex.h>
 #include <linux/serdev.h>
 #include <linux/of.h>
+#include <asm/unaligned.h>
 #include <linux/power/bq27xxx_battery.h>
 
 #define BQ27540_BIT_SET 0xfe
 #define BQ27540_BIT_UNSET 0xc0
 
 #define MSG_MAX 64
+
+#define TIMEOUT_MSEC 500
 
 struct bq27540_hdquart {
 	struct serdev_device *serdev;
@@ -58,18 +61,82 @@ static int bq27xxx_battery_uart_read(struct bq27xxx_device_info *di, u8 reg,
 				     bool single)
 {
 	u8 reg_buf[8];
+	unsigned long flags;
+	struct bq27540_hdquart *bbq = dev_get_drvdata(di->dev);
+	unsigned long timeout = msecs_to_jiffies(TIMEOUT_MSEC);
+	ssize_t test_val;
 
-	bq27540_data_to_cmdbuf(&reg, &reg_buf, 1);
+	bq27540_data_to_cmdbuf(&reg, reg_buf, 1);
 
-	if (serdev_device_write(di->dev, reg_buf, 1, HZ) != 8) {
-		dev_err(&di->dev, "UART transmit failed\n");
+	reinit_completion(&bbq->done);
+    	spin_lock_irqsave(&bbq->lock, flags);
+
+    	bbq->irxbit = 0;
+    	bbq->nrxbit = ((1 + single) ? 1 : 2) * 8;
+
+	spin_unlock_irqrestore(&bbq->lock, flags);
+
+	if ((test_val = serdev_device_write(bbq->serdev, reg_buf, 8, HZ)) != 8) {
+		dev_err(&bbq->serdev->dev, "%s: UART transmit failed: %zd\n", __func__, test_val);
+		dump_stack();
 		return -EINVAL;
 	}
+
+    	serdev_device_wait_until_sent(bbq->serdev, HZ);
+
+    	timeout = wait_for_completion_timeout(&bbq->done, timeout);
+
+    	if(timeout == 0) {
+        	dev_err(&bbq->serdev->dev, "%s: UART receive timed out [%02x]\n", __func__, reg);
+		dump_stack();
+        	return -ETIMEDOUT;
+    	}
+
+	return *(int*)(bbq->rxbuf + 8);
 }
 
 static int bq27xxx_battery_uart_bulk_read(struct bq27xxx_device_info *di,
 					  u8 reg, u8 *data, int len)
 {
+	u8 reg_buf[8];
+	unsigned long flags;
+	struct bq27540_hdquart *bbq = dev_get_drvdata(di->dev);
+	unsigned long timeout = msecs_to_jiffies(TIMEOUT_MSEC);
+
+	bq27540_data_to_cmdbuf(&reg, reg_buf, 1);
+
+	reinit_completion(&bbq->done);
+    	spin_lock_irqsave(&bbq->lock, flags);
+
+    	bbq->irxbit = 0;
+    	bbq->nrxbit = len + 8;
+
+	spin_unlock_irqrestore(&bbq->lock, flags);
+
+	if (serdev_device_write(bbq->serdev, reg_buf, 8, HZ) != 8) {
+		dev_err(&bbq->serdev->dev, "%s: UART transmit failed\n", __func__);
+		dump_stack();
+		return -EINVAL;
+	}
+
+    	serdev_device_wait_until_sent(bbq->serdev, HZ);
+
+    	timeout = wait_for_completion_timeout(&bbq->done, timeout);
+
+    	if(timeout == 0) {
+        	dev_err(&bbq->serdev->dev, "%s: UART receive timed out [%02x]\n", __func__, reg);
+		dump_stack();
+        	return -ETIMEDOUT;
+    	}
+
+	spin_lock_irqsave(&bbq->lock, flags);
+
+	memcpy(data, bbq->rxbuf + 8, len);
+
+	spin_unlock_irqrestore(&bbq->lock, flags);
+
+	return 0;
+
 }
 
 static int bq27xxx_battery_uart_write(struct bq27xxx_device_info *di, u8 reg,
@@ -77,8 +144,10 @@ static int bq27xxx_battery_uart_write(struct bq27xxx_device_info *di, u8 reg,
 {
 	u8 data[4];
 	u8 cmd_buf[32];
-	int ret;
+	ssize_t ret;
 	size_t len;
+	unsigned long flags;
+	struct bq27540_hdquart *bbq = dev_get_drvdata(di->dev);
 
 	data[0] = reg;
 	if (single) {
@@ -89,10 +158,18 @@ static int bq27xxx_battery_uart_write(struct bq27xxx_device_info *di, u8 reg,
 		len = 3;
 	}
 
-	bq27540_data_to_cmdbuf(&data, &cmd_buf, len);
 
-	if (serdev_device_write(di->dev, cmd_buf, len * 8, HZ) != len * 8) {
-		dev_err(&di->dev, "UART transmit failed\n");
+	bq27540_data_to_cmdbuf(data, cmd_buf, len);
+
+	spin_lock_irqsave(&bbq->lock, flags);
+
+	ret = serdev_device_write(bbq->serdev, cmd_buf, len * 8, HZ);
+
+	spin_unlock_irqrestore(&bbq->lock, flags);
+
+	if (ret != len * 8) {
+		dev_err(&bbq->serdev->dev, "%s: UART transmit failed\n", __func__);
+		dump_stack();
 		return -EINVAL;
 	}
 
@@ -105,45 +182,65 @@ static int bq27xxx_battery_uart_bulk_write(struct bq27xxx_device_info *di,
 	u8 buf[33];
 	u8 *cmd_buf;
 	ssize_t ret;
+	unsigned long flags;
+	struct bq27540_hdquart *bbq = dev_get_drvdata(di->dev);
 
 	len += 1;
 
-	cmd_buf = devm_kzalloc(&di->dev, len * 8, GFP_KERNEL);
+	cmd_buf = devm_kzalloc(di->dev, len * 8, GFP_KERNEL);
 	if (!cmd_buf)
 		return -ENOMEM;
 
 	buf[0] = reg;
 	memcpy(&buf[1], data, len);
 
-	bq27540_data_to_cmdbuf(&buf, &cmd_buf, len);
+	bq27540_data_to_cmdbuf(buf, cmd_buf, len);
 
-	ret = serdev_device_write(di->dev, &cmd_buf, len * 8, HZ);
+    	spin_lock_irqsave(&bbq->lock, flags);
+
+	ret = serdev_device_write(bbq->serdev, cmd_buf, len * 8, HZ);
+
+	spin_unlock_irqrestore(&bbq->lock, flags);
 
 	devm_kfree(di->dev, cmd_buf);
 
-	if (ret != len) {
-		dev_err(&di->dev, "UART transmit failed\n");
+	if (ret != len * 8) {
+		dev_err(&bbq->serdev->dev, "%s: UART transmit failed\n", __func__);
+		dump_stack();
 		return -EINVAL;
 	}
 
 	return 0;
 }
 
-static int bq27540_hdquart_receive_buf(struct serdev_device *serdev,
+static size_t bq27540_hdquart_receive_buf(struct serdev_device *serdev,
 				       const unsigned char *buf, size_t size)
 {
-	return 0;
+    struct device *dev = &serdev->dev;
+    struct bq27540_hdquart *bbq = dev_get_drvdata(dev);
+    unsigned i, j;
+    unsigned long flags;
+
+    spin_lock_irqsave(&bbq->lock, flags);
+    for(i=0; i<size; i++) {
+        j = bbq->irxbit;
+	/* The controller should always echo the command first */
+        if(j < 8 && buf[i] != bbq->txstart[j])
+            continue;
+        if(j < bbq->nrxbit) {
+            if((j & 7) == 0)
+                bbq->rxbuf[j >> 3] = 0;
+            if(buf[i] >= 0xF0)
+                bbq->rxbuf[j >> 3] |= 1u << (j & 7);
+            bbq->irxbit ++;
+            if(bbq->irxbit >= bbq->nrxbit)
+                complete(&bbq->done);
+        }
+    }
+    spin_unlock_irqrestore(&bbq->lock, flags);
+
+    return size;
 }
-
-module_serdev_device_driver(bq27xxx_battery_uart_driver);
-
-#ifdef CONFIG_OF
-static const struct of_device_id bq27xxx_battery_uart_of_match_table[] = {
-	{ .compatible = "ti,bq27540" },
-	{},
-};
-MODULE_DEVICE_TABLE(of, bq27xxx_battery_uart_of_match_table);
-#endif
 
 static const struct serdev_device_ops bq27540_hdquart_serdev_device_ops = {
 	.receive_buf = bq27540_hdquart_receive_buf,
@@ -168,6 +265,8 @@ static int bq27xxx_battery_uart_probe(struct serdev_device *serdev)
 	if (!bbq)
 		return -ENOMEM;
 
+	bbq->serdev = serdev;
+	dev_set_drvdata(dev, bbq);
 	mutex_init(&bbq->mtx);
 	spin_lock_init(&bbq->lock);
 	init_completion(&bbq->done);
@@ -199,24 +298,25 @@ static void bq27xxx_battery_uart_remove(struct serdev_device *serdev)
 	return;
 }
 
-static const struct of_device_id bq27xxx_battery_uart_of_match[] = {
-	{
-		.compatible = "ti,bq27540",
-	},
+#ifdef CONFIG_OF
+static const struct of_device_id bq27xxx_battery_uart_of_match_table[] = {
+	{ .compatible = "ti,bq27540" },
 	{},
 };
-MODULE_DEVICE_TABLE(of, bq27xxx_battery_uart_of_match);
+MODULE_DEVICE_TABLE(of, bq27xxx_battery_uart_of_match_table);
+#endif
 
 static struct serdev_device_driver bq27xxx_battery_uart_driver = {
 	.probe = bq27xxx_battery_uart_probe,
 	.remove = bq27xxx_battery_uart_remove,
 	.driver = {
 		.name = "bq27xxx_battery_uart",
-		.of_match_table = bq27xxx_battery_uart_of_match,
+		.of_match_table = bq27xxx_battery_uart_of_match_table,
 	},
 };
 
 module_serdev_device_driver(bq27xxx_battery_uart_driver);
+
 
 MODULE_AUTHOR("Nick Chan <towinchenmi@gmail.com>");
 MODULE_DESCRIPTION("BQ27xxx battery monitor UART driver");
