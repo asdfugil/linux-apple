@@ -431,6 +431,7 @@ static u8
 		[BQ27XXX_REG_AP] = 0x24,
 		BQ27XXX_DM_REG_ROWS,
 	},
+#define bq27540_regs bq27545_regs
 	bq27421_regs[BQ27XXX_REG_MAX] = {
 		[BQ27XXX_REG_CTRL] = 0x00,
 		[BQ27XXX_REG_TEMP] = 0x02,
@@ -777,6 +778,7 @@ static enum power_supply_property bq27545_props[] = {
 	POWER_SUPPLY_PROP_POWER_AVG,
 	POWER_SUPPLY_PROP_MANUFACTURER,
 };
+#define bq27540_props bq27545_props
 
 static enum power_supply_property bq27421_props[] = {
 	POWER_SUPPLY_PROP_STATUS,
@@ -944,7 +946,10 @@ static struct bq27xxx_dm_reg bq27545_dm_regs[] = {
 	[BQ27XXX_DM_DESIGN_ENERGY]     = { 48, 25, 2,    0, 32767 },
 	[BQ27XXX_DM_TERMINATE_VOLTAGE] = { 80, 67, 2, 2800,  3700 },
 };
+
+#define bq27540_dm_regs bq27545_dm_regs
 #else
+#define bq27540_dm_regs NULL
 #define bq27545_dm_regs NULL
 #endif
 
@@ -1039,6 +1044,7 @@ static struct {
 	[BQ27542]   = BQ27XXX_DATA(bq27542,   0         , BQ27XXX_O_OTDC),
 	[BQ27546]   = BQ27XXX_DATA(bq27546,   0         , BQ27XXX_O_OTDC),
 	[BQ27742]   = BQ27XXX_DATA(bq27742,   0         , BQ27XXX_O_OTDC),
+	[BQ27540]   = BQ27XXX_DATA(bq27540,   0x04143672, BQ27XXX_O_OTDC),
 	[BQ27545]   = BQ27XXX_DATA(bq27545,   0x04143672, BQ27XXX_O_OTDC),
 	[BQ27411]   = BQ27XXX_DATA(bq27411,   0x80008000, BQ27XXX_O_UTOT | BQ27XXX_O_CFGUP | BQ27XXX_O_RAM),
 	[BQ27421]   = BQ27XXX_DATA(bq27421,   0x80008000, BQ27XXX_O_UTOT | BQ27XXX_O_CFGUP | BQ27XXX_O_RAM),

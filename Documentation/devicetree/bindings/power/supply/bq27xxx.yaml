@@ -42,6 +42,7 @@ properties:
       - ti,bq27542
       - ti,bq27546
       - ti,bq27742
+      - ti,bq27540
       - ti,bq27545
       - ti,bq27411
       - ti,bq27421
