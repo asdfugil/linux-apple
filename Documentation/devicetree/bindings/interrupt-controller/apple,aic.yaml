@@ -33,7 +33,7 @@ description: |
 
   IPIs may be performed via MMIO registers on all variants of AIC. Starting
   from A11, system registers may also be used for "fast" IPIs. Starting from
-  M1, even faster IPIs within the same cluster may be achieved by writing to
+  A12Z, even faster IPIs within the same cluster may be achieved by writing to
   a "local" fast IPI register as opposed to using the "global" fast IPI
   register.
 
@@ -42,15 +42,20 @@ allOf:
 
 properties:
   compatible:
-    items:
-      - enum:
-          - apple,s5l8960x-aic
-          - apple,t7000-aic
-          - apple,s8000-aic
-          - apple,t8010-aic
-          - apple,t8015-aic
-          - apple,t8103-aic
-      - const: apple,aic
+    oneOf:
+      - items:
+          - enum:
+              - apple,s5l8960x-aic
+              - apple,t7000-aic
+              - apple,s8000-aic
+              - apple,t8010-aic
+              - apple,t8015-aic
+              - apple,t8103-aic
+          - const: apple,aic
+      - items:
+          - const: apple,t8027-aic
+          - const: apple,t8103-aic
+          - const: apple,aic
 
   interrupt-controller: true
 
