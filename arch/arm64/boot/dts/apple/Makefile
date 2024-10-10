@@ -52,6 +52,7 @@ dtb-$(CONFIG_ARCH_APPLE) += t8015-d211.dtb
 dtb-$(CONFIG_ARCH_APPLE) += t8015-d21.dtb
 dtb-$(CONFIG_ARCH_APPLE) += t8015-d221.dtb
 dtb-$(CONFIG_ARCH_APPLE) += t8015-d22.dtb
+dtb-$(CONFIG_ARCH_APPLE) += t8027-j273a.dtb
 dtb-$(CONFIG_ARCH_APPLE) += t8103-j274.dtb
 dtb-$(CONFIG_ARCH_APPLE) += t8103-j293.dtb
 dtb-$(CONFIG_ARCH_APPLE) += t8103-j313.dtb
