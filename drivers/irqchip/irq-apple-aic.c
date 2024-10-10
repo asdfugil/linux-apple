@@ -239,6 +239,9 @@ static DEFINE_STATIC_KEY_TRUE(use_fast_ipi);
 /* True if SYS_IMP_APL_IPI_RR_LOCAL_EL1 exists for local fast IPIs (M1+) */
 static DEFINE_STATIC_KEY_TRUE(use_local_fast_ipi);
 
+#define AIC_NR_CPUS		8
+static int aic_cpu_map[AIC_NR_CPUS] __read_mostly;
+
 struct aic_info {
 	int version;
 
@@ -436,7 +439,9 @@ static int aic_irq_set_affinity(struct irq_data *d,
 	else
 		cpu = cpumask_any_and(mask_val, cpu_online_mask);
 
-	aic_ic_write(ic, ic->info.target_cpu + AIC_HWIRQ_IRQ(hwirq) * 4, BIT(cpu));
+	aic_ic_write(ic, ic->info.target_cpu + AIC_HWIRQ_IRQ(hwirq) * 4,
+		BIT(aic_cpu_map[cpu]));
+
 	irq_data_update_effective_affinity(d, cpumask_of(cpu));
 
 	return IRQ_SET_MASK_OK;
@@ -805,7 +810,8 @@ static void aic_ipi_send_single(unsigned int cpu)
 	if (static_branch_likely(&use_fast_ipi))
 		aic_ipi_send_fast(cpu);
 	else
-		aic_ic_write(aic_irqc, AIC_IPI_SEND, AIC_IPI_SEND_CPU(cpu));
+		aic_ic_write(aic_irqc, AIC_IPI_SEND,
+			AIC_IPI_SEND_CPU(aic_cpu_map[cpu]));
 }
 
 static int __init aic_init_smp(struct aic_irq_chip *irqc, struct device_node *node)
@@ -857,12 +863,16 @@ static int aic_init_cpu(unsigned int cpu)
 	isb();
 
 	if (aic_irqc->info.version == 1) {
+		unsigned int cpu = smp_processor_id();
+
 		/*
-		 * Make sure the kernel's idea of logical CPU order is the same as AIC's
-		 * If we ever end up with a mismatch here, we will have to introduce
-		 * a mapping table similar to what other irqchip drivers do.
+		 * Set up a CPU map as AIC's idea of CPU order may not be the
+		 * same as the logical CPU order.
 		 */
-		WARN_ON(aic_ic_read(aic_irqc, AIC_WHOAMI) != smp_processor_id());
+		if (WARN_ON(cpu >= AIC_NR_CPUS))
+			return -EINVAL;
+
+		aic_cpu_map[cpu] = aic_ic_read(aic_irqc, AIC_WHOAMI);
 
 		/*
 		 * Always keep IPIs unmasked at the hardware level (except auto-masking
