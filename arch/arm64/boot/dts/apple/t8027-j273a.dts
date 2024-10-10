@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Apple Development Platform (2020), J273a, ADP3,2 (A2330)
+ * Copyright (c) 2024, Nick Chan <towinchenmi@gmail.com>
+ */
+
+/dts-v1/;
+
+#include "t8027.dtsi"
+#include "t8027-common.dtsi"
+
+/ {
+	chassis-type = "desktop";
+
+	compatible = "apple,j273a", "apple,t8027", "apple,arm-platform";
+	model = "Apple Development Platform (2020)";
+};
