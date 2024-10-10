@@ -346,7 +346,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = "usb2host0";
-		power-domains = <&ps_usbctlreg>, <&ps_usb>;
+		power-domains = <&ps_usb>, <&ps_usbctlreg>;
 	};
 
 	ps_usb2host1: power-controller@80290 {
@@ -355,7 +355,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = "usb2host1";
-		power-domains = <&ps_usbctlreg>, <&ps_usb>;
+		power-domains = <&ps_usb>, <&ps_usbctlreg>;
 	};
 
 	ps_rtmux: power-controller@802b0 {
@@ -506,7 +506,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = "usb2host0_ohci";
-		power-domains = <&ps_usbctlreg>, <&ps_usb>;
+		power-domains = <&ps_usb>, <&ps_usbctlreg>;
 	};
 
 	ps_usb2dev: power-controller@80298 {
@@ -515,7 +515,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = "usb2dev";
-		power-domains = <&ps_usbctlreg>, <&ps_usb>;
+		power-domains = <&ps_usb>, <&ps_usbctlreg>;
 	};
 
 	ps_smx: power-controller@802a0 {
