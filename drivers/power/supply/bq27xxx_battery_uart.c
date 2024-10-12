@@ -14,8 +14,10 @@
 #include <linux/mutex.h>
 #include <linux/serdev.h>
 #include <linux/of.h>
-#include <asm/unaligned.h>
+#include <linux/unaligned.h>
 #include <linux/power/bq27xxx_battery.h>
+
+#define DEBUG 1
 
 #define BQ27540_BIT_SET 0xfe
 #define BQ27540_BIT_UNSET 0xc0
@@ -78,7 +80,6 @@ static int bq27xxx_battery_uart_read(struct bq27xxx_device_info *di, u8 reg,
 
 	if ((test_val = serdev_device_write(bbq->serdev, reg_buf, 8, HZ)) != 8) {
 		dev_err(&bbq->serdev->dev, "%s: UART transmit failed: %zd\n", __func__, test_val);
-		dump_stack();
 		return -EINVAL;
 	}
 
@@ -88,7 +89,6 @@ static int bq27xxx_battery_uart_read(struct bq27xxx_device_info *di, u8 reg,
 
     	if(timeout == 0) {
         	dev_err(&bbq->serdev->dev, "%s: UART receive timed out [%02x]\n", __func__, reg);
-		dump_stack();
         	return -ETIMEDOUT;
     	}
 
@@ -115,7 +115,6 @@ static int bq27xxx_battery_uart_bulk_read(struct bq27xxx_device_info *di,
 
 	if (serdev_device_write(bbq->serdev, reg_buf, 8, HZ) != 8) {
 		dev_err(&bbq->serdev->dev, "%s: UART transmit failed\n", __func__);
-		dump_stack();
 		return -EINVAL;
 	}
 
@@ -125,7 +124,6 @@ static int bq27xxx_battery_uart_bulk_read(struct bq27xxx_device_info *di,
 
     	if(timeout == 0) {
         	dev_err(&bbq->serdev->dev, "%s: UART receive timed out [%02x]\n", __func__, reg);
-		dump_stack();
         	return -ETIMEDOUT;
     	}
 
@@ -169,7 +167,6 @@ static int bq27xxx_battery_uart_write(struct bq27xxx_device_info *di, u8 reg,
 
 	if (ret != len * 8) {
 		dev_err(&bbq->serdev->dev, "%s: UART transmit failed\n", __func__);
-		dump_stack();
 		return -EINVAL;
 	}
 
@@ -206,7 +203,6 @@ static int bq27xxx_battery_uart_bulk_write(struct bq27xxx_device_info *di,
 
 	if (ret != len * 8) {
 		dev_err(&bbq->serdev->dev, "%s: UART transmit failed\n", __func__);
-		dump_stack();
 		return -EINVAL;
 	}
 
