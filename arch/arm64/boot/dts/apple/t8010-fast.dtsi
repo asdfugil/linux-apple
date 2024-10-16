@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: GPL-2.0 OR MIT
+/*
+ * This file contains fast operating points for iPhone 7, iPad 6 and iPad 7
+ *
+ * Copyright (c) 2024, Nick Chan <towinchenmi@gmail.com>
+ */
+
+/ {
+	opp: opp-table {
+		opp09 {
+			opp-hz = /bits/ 64 <1944000000>;
+			opp-level = <9>;
+		};
+
+		opp10 {
+			opp-hz = /bits/ 64 <2244000000>;
+			opp-level = <10>;
+		};
+
+#if 0
+		/* Not available until CPU deep sleep is implemented */
+		opp11 {
+			opp-hz = /bits/ 64 <2340000000>;
+			opp-level = <11>;
+			turbo-mode;
+		};
+#endif
+	};
+};
