@@ -223,6 +223,13 @@ properties:
           - const: apple,t8015
           - const: apple,arm-platform
 
+      - description: Apple A12X/Z SoC based platforms
+        items:
+          - enum:
+              - apple,j273a # Apple Development Platform (2020)
+          - const: apple,t8027
+          - const: apple,arm-platform
+
       - description: Apple M1 SoC based platforms
         items:
           - enum:

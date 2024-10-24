@@ -93,8 +93,10 @@ properties:
       - apple,icestorm
       - apple,mistral
       - apple,monsoon
+      - apple,tempset
       - apple,twister
       - apple,typhoon
+      - apple,vortex
       - arm,arm710t
       - arm,arm720t
       - arm,arm740t
