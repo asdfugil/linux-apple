@@ -295,6 +295,20 @@ config BATTERY_BQ27XXX_UART
 	  Say Y here to enable support for batteries with BQ27xxx chips
 	  connected over an UART bus.
 
+config CHARGER_SN2400
+	tristate "SN2400 Charger Support"
+	depends on SERIAL_DEV_BUS
+	default y
+	help
+	  Say Y here to enable corellium garbage.
+
+config BATTERY_BQ27XXX_HDQUART
+	tristate "BQ27xxx UART support"
+	depends on SERIAL_DEV_BUS && CHARGER_SN2400
+	default y
+	help
+	  Say Y here to enable corellium garbage.
+
 config BATTERY_BQ27XXX_DT_UPDATES_NVM
 	bool "BQ27xxx support for update of NVM/flash data memory"
 	depends on BATTERY_BQ27XXX_I2C

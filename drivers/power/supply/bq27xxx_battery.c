@@ -42,6 +42,8 @@
  * https://www.ti.com/product/bq78z100
  */
 
+#define DBEUG 1
+
 #include <linux/device.h>
 #include <linux/module.h>
 #include <linux/mutex.h>

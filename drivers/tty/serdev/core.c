@@ -406,6 +406,17 @@ int serdev_device_break_ctl(struct serdev_device *serdev, int break_state)
 }
 EXPORT_SYMBOL_GPL(serdev_device_break_ctl);
 
+int serdev_device_stopbit_ctl(struct serdev_device *serdev, bool stop)
+{
+	struct serdev_controller *ctrl = serdev->ctrl;
+
+	if (!ctrl || !ctrl->ops->stopbit_ctl)
+		return -ENOTSUPP;
+
+	return ctrl->ops->stopbit_ctl(ctrl, stop);
+}
+EXPORT_SYMBOL_GPL(serdev_device_stopbit_ctl);
+
 static int serdev_drv_probe(struct device *dev)
 {
 	const struct serdev_device_driver *sdrv = to_serdev_device_driver(dev->driver);
