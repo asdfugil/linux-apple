@@ -89,6 +89,7 @@
 
 			gas_gauge: gas-gauge@0 {
 				compatible = "ti,bq27545-hdquart";
+				//charger = <&charger>;
 			};
 		};
 
@@ -135,6 +136,11 @@
 				     <AIC_IRQ 46 IRQ_TYPE_LEVEL_HIGH>,
 				     <AIC_IRQ 47 IRQ_TYPE_LEVEL_HIGH>,
 				     <AIC_IRQ 48 IRQ_TYPE_LEVEL_HIGH>;
+
+			i2c1_pins: i2c1-pins {
+				pinmux = <APPLE_PINMUX(114, 1)>,
+					 <APPLE_PINMUX(115, 1)>;
+			};
 		};
 
 		pinctrl_aop: pinctrl@2100f0000 {
@@ -166,6 +172,25 @@
 
 			reg = <0x2 0x10200000 0 0x84000>;
 		};
+
+                i2c1: i2c@20a111000 {
+                        compatible = "apple,s8000-i2c", "apple,i2c";
+                        reg = <0x2 0x0a111000 0x0 0x1000>;
+                        clocks = <&clkref>;
+                        interrupt-parent = <&aic>;
+                        interrupts = <AIC_IRQ 207 IRQ_TYPE_LEVEL_HIGH>;
+                        pinctrl-0 = <&i2c1_pins>;
+                        pinctrl-names = "default";
+                        #address-cells = <0x1>;
+                        #size-cells = <0x0>;
+                        power-domains = <&ps_i2c1>;
+
+            /*charger: sn2400@75 {
+                compatible = "charger,sn2400";
+                reg = <0x75>;
+                charge-current = <1950>;
+            };*/
+                };
 
 		wdt: watchdog@2102b0000 {
 			compatible = "apple,s8000-wdt", "apple,wdt";

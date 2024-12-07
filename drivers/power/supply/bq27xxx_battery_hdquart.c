@@ -23,7 +23,7 @@
 
 #define POLL_INIT_MSEC 1500
 #define POLL_MSEC 2000
-#define TIMEOUT_MSEC 500
+#define TIMEOUT_MSEC 1000
 #define MSG_MAX 64
 
 #define GG_Temperature 0x06
@@ -83,9 +83,9 @@ static void bq27545_hdquart_delayed_func(struct work_struct *_work)
 		container_of(_work, struct bq27545_hdquart, work.work);
 	int ret;
 
-	ret = sn2400_charger_hdq_mux(bbq->charger, &bbq->serdev->dev, 1);
+	/*ret = sn2400_charger_hdq_mux(bbq->charger, &bbq->serdev->dev, 1);
 	if (ret)
-		goto exit_early;
+		goto exit_early;*/
 
 	msleep(10);
 
@@ -110,7 +110,7 @@ static void bq27545_hdquart_delayed_func(struct work_struct *_work)
 	else if (bbq->good_data)
 		bbq->good_data--;
 
-	sn2400_charger_hdq_mux(bbq->charger, &bbq->serdev->dev, 0);
+	//sn2400_charger_hdq_mux(bbq->charger, &bbq->serdev->dev, 0);
 exit_early:
 	schedule_delayed_work(&bbq->work,
 			      msecs_to_jiffies(bbq->first ? POLL_INIT_MSEC :
@@ -181,7 +181,7 @@ static int bq27545_hdquart_xfer(struct bq27545_hdquart *bbq, uint8_t *txdata,
 
 	timeout = wait_for_completion_timeout(&bbq->done, timeout);
 	if (timeout == 0) {
-		dev_err(&bbq->serdev->dev, "HDQ receive timed out [%02x]\n",
+		dev_err_ratelimited(&bbq->serdev->dev, "HDQ receive timed out [%02x]\n",
 			txdata[0]);
 		return -ETIMEDOUT;
 	}
@@ -334,7 +334,7 @@ static int bq27545_hdquart_probe(struct serdev_device *serdev)
 	if (!bbq)
 		return -ENOMEM;
 
-	of_charger = of_parse_phandle(dev->of_node, "charger", 0);
+	/*of_charger = of_parse_phandle(dev->of_node, "charger", 0);
 	if (of_charger) {
 		bbq->charger =
 			bus_find_device_by_of_node(&i2c_bus_type, of_charger);
@@ -343,7 +343,7 @@ static int bq27545_hdquart_probe(struct serdev_device *serdev)
 		ret = sn2400_charger_register(bbq->charger, dev);
 		if (ret)
 			return ret;
-	}
+	}*/
 
 	bbq->serdev = serdev;
 	dev_set_drvdata(dev, bbq);
