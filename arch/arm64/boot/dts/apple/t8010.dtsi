@@ -164,7 +164,7 @@
 			//status = "disabled";
 
 			gas_gauge: gas-gauge@0 {
-				compatible = "ti,bq27540";
+				compatible = "ti,bq27545-hdquart";
 			};
 		};
 

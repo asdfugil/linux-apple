@@ -146,13 +146,13 @@ static int bq27xxx_battery_uart_read(struct bq27xxx_device_info *di, u8 reg,
 	int result;
 
 	if (single) {
-		dev_info(di->dev, "single xfer\n");
+		//dev_info(di->dev, "single xfer\n");
 		int ret = bq27545_hdquart_xfer(di, &reg, 1, &rxdata, xfer_sz);
 		if (ret) return ret;
 		return rxdata;
 	}
 	else {
-		dev_info(di->dev, "16-bit xfer\n");
+		//dev_info(di->dev, "16-bit xfer\n");
 		int ret = bq27545_hdquart_read_word(di, reg, &result);
 		if (ret) return ret;
 		return result;
@@ -257,7 +257,7 @@ static size_t bq27540_hdquart_receive_buf(struct serdev_device *serdev,
 	unsigned i, j;
 	unsigned long flags;
 
-	dev_info(dev, "received data!\n");
+	//dev_info(dev, "received data!\n");
 
 	spin_lock_irqsave(&bbq->lock, flags);
 	for (i = 0; i < size; i++) {
@@ -332,7 +332,7 @@ static int bq27xxx_battery_uart_probe(struct serdev_device *serdev)
 	di->name = "bq27540-battery";
 	di->bus.read = bq27xxx_battery_uart_read;
 	//di->bus.write = bq27xxx_battery_uart_write;
-	//di->bus.read_bulk = bq27xxx_battery_uart_bulk_read;
+	di->bus.read_bulk = bq27xxx_battery_uart_bulk_read;
 	//di->bus.write_bulk = bq27xxx_battery_uart_bulk_write;
 
 	return bq27xxx_battery_setup(di);
