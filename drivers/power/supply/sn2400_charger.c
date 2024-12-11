@@ -442,13 +442,13 @@ err_psy_usb:
 	return -EPERM;
 }
 
-int sn2400_charger_register(struct device *charger, struct device *client)
+/*static int sn2400_charger_register(struct device *charger, struct device *client)
 {
 	struct sn2400_chg *pchg = dev_get_drvdata(charger);
 	if (!pchg)
 		return -EPROBE_DEFER;
 	return 0;
-}
+}*/
 
 int sn2400_charger_hdq_mux(struct device *charger, struct device *client,
 			   unsigned route)

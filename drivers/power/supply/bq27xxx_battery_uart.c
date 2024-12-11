@@ -43,6 +43,7 @@ struct bq27540_hdquart {
 	unsigned good_data;
 };
 
+#if 0
 /**
  * bq27540_data_to_cmdbuf() - Convert data to command buffer
  * 
@@ -58,6 +59,7 @@ static void bq27540_data_to_cmdbuf(u8 *data, u8 *cmdbuf, size_t data_size)
 						    BQ27540_BIT_SET :
 						    BQ27540_BIT_UNSET;
 }
+#endif
 
 static int bq27545_hdquart_xfer(struct bq27xxx_device_info *di, uint8_t *txdata,
 				size_t txsize, uint8_t *rxdata, size_t rxsize)

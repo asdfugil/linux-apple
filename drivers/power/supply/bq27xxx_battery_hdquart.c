@@ -111,7 +111,7 @@ static void bq27545_hdquart_delayed_func(struct work_struct *_work)
 		bbq->good_data--;
 
 	//sn2400_charger_hdq_mux(bbq->charger, &bbq->serdev->dev, 0);
-exit_early:
+//exit_early:
 	schedule_delayed_work(&bbq->work,
 			      msecs_to_jiffies(bbq->first ? POLL_INIT_MSEC :
 							    POLL_MSEC));
@@ -327,7 +327,7 @@ static int bq27545_hdquart_probe(struct serdev_device *serdev)
 {
 	struct device *dev = &serdev->dev;
 	struct bq27545_hdquart *bbq;
-	struct device_node *of_charger;
+	//struct device_node *of_charger;
 	int ret;
 
 	bbq = devm_kzalloc(dev, sizeof(*bbq), GFP_KERNEL);
