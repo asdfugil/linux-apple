@@ -716,6 +716,8 @@ static enum power_supply_property bq27520g3_props[] = {
 	POWER_SUPPLY_PROP_MANUFACTURER,
 };
 
+#define bq27540_props bq27520g3_props
+
 static enum power_supply_property bq27520g4_props[] = {
 	POWER_SUPPLY_PROP_STATUS,
 	POWER_SUPPLY_PROP_PRESENT,
@@ -800,7 +802,6 @@ static enum power_supply_property bq27545_props[] = {
 	POWER_SUPPLY_PROP_POWER_AVG,
 	POWER_SUPPLY_PROP_MANUFACTURER,
 };
-#define bq27540_props bq27545_props
 
 static enum power_supply_property bq27421_props[] = {
 	POWER_SUPPLY_PROP_STATUS,

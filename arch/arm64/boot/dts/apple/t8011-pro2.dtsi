@@ -48,3 +48,7 @@
 &ps_dcs7 {
 	apple,always-on; /* LPDDR4 interface */
 };
+
+&serial5 {
+	compatible = "ti,bq27540";
+};

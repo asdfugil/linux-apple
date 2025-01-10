@@ -86,11 +86,6 @@
 			clock-names = "uart", "clk_uart_baud0";
 			power-domains = <&ps_uart5>;
 			status = "disabled";
-
-			gas_gauge: gas-gauge@0 {
-				compatible = "ti,bq27540";
-				//charger = <&charger>;
-			};
 		};
 
 		pmgr: power-management@20e000000 {

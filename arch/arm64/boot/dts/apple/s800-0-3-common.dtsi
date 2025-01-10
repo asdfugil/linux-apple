@@ -12,6 +12,7 @@
 / {
 	aliases {
 		serial0 = &serial0;
+		serial5 = &serial5;
 	};
 
 	chosen {
