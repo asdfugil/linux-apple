@@ -41,7 +41,7 @@ enum bq27xxx_chip {
 
 struct bq27xxx_device_info;
 struct bq27xxx_access_methods {
-	int (*read)(struct bq27xxx_device_info *di, u8 reg, bool single);
+	int (*read)(struct bq27xxx_device_info *di, u8 reg, bool single, int* data);
 	int (*write)(struct bq27xxx_device_info *di, u8 reg, int value, bool single);
 	int (*read_bulk)(struct bq27xxx_device_info *di, u8 reg, u8 *data, int len);
 	int (*write_bulk)(struct bq27xxx_device_info *di, u8 reg, u8 *data, int len);

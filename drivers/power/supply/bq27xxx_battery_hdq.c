@@ -38,7 +38,7 @@ static int w1_bq27000_read(struct w1_slave *sl, unsigned int reg)
 }
 
 static int bq27xxx_battery_hdq_read(struct bq27xxx_device_info *di, u8 reg,
-				    bool single)
+				    bool single, int* data)
 {
 	struct w1_slave *sl = dev_to_w1_slave(di->dev);
 	unsigned int timeout = 3;
@@ -69,7 +69,13 @@ static int bq27xxx_battery_hdq_read(struct bq27xxx_device_info *di, u8 reg,
 		return (upper << 8) | lower;
 	}
 
-	return w1_bq27000_read(sl, reg);
+	int ret = w1_bq27000_read(sl, reg);
+
+	if (ret < 0)
+		return ret;
+
+	*data = ret;
+	return 0;
 }
 
 static int bq27xxx_battery_hdq_add_slave(struct w1_slave *sl)

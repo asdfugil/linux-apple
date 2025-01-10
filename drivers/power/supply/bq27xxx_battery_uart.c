@@ -61,7 +61,7 @@ static void bq27540_data_to_cmdbuf(u8 *data, u8 *cmdbuf, size_t data_size)
 }
 #endif
 
-static int bq27545_hdquart_xfer(struct bq27xxx_device_info *di, uint8_t *txdata,
+static int bq27xxx_hdquart_xfer(struct bq27xxx_device_info *di, uint8_t *txdata,
 				size_t txsize, uint8_t *rxdata, size_t rxsize)
 {
 	struct bq27540_hdquart *bbq = dev_get_drvdata(di->dev);
@@ -113,27 +113,27 @@ static int bq27545_hdquart_xfer(struct bq27xxx_device_info *di, uint8_t *txdata,
 	return 0;
 }
 
-static int bq27545_hdquart_read_word(struct bq27xxx_device_info *di, uint8_t key,
+static int bq27xxx_hdquart_read_word(struct bq27xxx_device_info *di, uint8_t key,
 				     int *result)
 {
 	int ret;
 	uint8_t h0, l0, h1, l1, key2 = key + 1;
 
 	/* this is TI's recommended read process for 16-bit registers */
-	ret = bq27545_hdquart_xfer(di, &key2, 1, &h0, 1);
+	ret = bq27xxx_hdquart_xfer(di, &key2, 1, &h0, 1);
 	if (ret)
 		return ret;
-	ret = bq27545_hdquart_xfer(di, &key, 1, &l0, 1);
+	ret = bq27xxx_hdquart_xfer(di, &key, 1, &l0, 1);
 	if (ret)
 		return ret;
-	ret = bq27545_hdquart_xfer(di, &key2, 1, &h1, 1);
+	ret = bq27xxx_hdquart_xfer(di, &key2, 1, &h1, 1);
 	if (ret)
 		return ret;
 	if (h0 == h1) {
 		*result = (int16_t)(l0 | ((unsigned)h0 << 8));
 		return 0;
 	}
-	ret = bq27545_hdquart_xfer(di, &key, 1, &l1, 1);
+	ret = bq27xxx_hdquart_xfer(di, &key, 1, &l1, 1);
 	if (ret)
 		return ret;
 	*result = (int16_t)(l1 | ((unsigned)h1 << 8));
@@ -141,30 +141,32 @@ static int bq27545_hdquart_read_word(struct bq27xxx_device_info *di, uint8_t key
 }
 
 static int bq27xxx_battery_uart_read(struct bq27xxx_device_info *di, u8 reg,
-				     bool single)
+				     bool single, int* data)
 {
 	size_t xfer_sz = single ? 1 : 2;
 	uint8_t rxdata;
 	int result;
 
 	if (single) {
-		//dev_info(di->dev, "single xfer\n");
-		int ret = bq27545_hdquart_xfer(di, &reg, 1, &rxdata, xfer_sz);
+		//dev_dbg(di->dev, "single xfer\n");
+		int ret = bq27xxx_hdquart_xfer(di, &reg, 1, &rxdata, xfer_sz);
 		if (ret) return ret;
-		return rxdata;
+		*data = rxdata;
+		return 0;
 	}
 	else {
-		//dev_info(di->dev, "16-bit xfer\n");
-		int ret = bq27545_hdquart_read_word(di, reg, &result);
+		//dev_dbg(di->dev, "16-bit xfer\n");
+		int ret = bq27xxx_hdquart_read_word(di, reg, &result);
 		if (ret) return ret;
-		return result;
+		*data = result;
+		return 0;
 	}
 }
 
 static int bq27xxx_battery_uart_bulk_read(struct bq27xxx_device_info *di,
 					  u8 reg, u8 *data, int len)
 {
-	return bq27545_hdquart_xfer(di, &reg, 1, data, len);
+	return bq27xxx_hdquart_xfer(di, &reg, 1, data, len);
 }
 
 /*

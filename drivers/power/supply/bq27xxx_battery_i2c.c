@@ -25,7 +25,7 @@ static irqreturn_t bq27xxx_battery_irq_handler_thread(int irq, void *data)
 }
 
 static int bq27xxx_battery_i2c_read(struct bq27xxx_device_info *di, u8 reg,
-				    bool single)
+				    bool single, int* data)
 {
 	struct i2c_client *client = to_i2c_client(di->dev);
 	struct i2c_msg msg[2];
@@ -52,11 +52,11 @@ static int bq27xxx_battery_i2c_read(struct bq27xxx_device_info *di, u8 reg,
 		return ret;
 
 	if (!single)
-		ret = get_unaligned_le16(data);
+		*data = get_unaligned_le16(data);
 	else
-		ret = data[0];
+		*data = data[0];
 
-	return ret;
+	return 0;
 }
 
 static int bq27xxx_battery_i2c_write(struct bq27xxx_device_info *di, u8 reg,
