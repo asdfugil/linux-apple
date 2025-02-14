@@ -151,6 +151,17 @@
 			#performance-domain-cells = <0>;
 		};
 
+		disp0_dart: iommu@206304000 {
+			compatible = "apple,t8010-dart", "apple,s5l8960x-dart";
+			reg = <0x2 0x06304000 0x0 0x4000>;
+			#iommu-cells = <1>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 156 IRQ_TYPE_LEVEL_HIGH>;
+			power-domains = <&ps_disp0_be>;
+			//apple,dma-range = <0x0 0x0 0x0 0xfc000000>;
+			//status = "disabled";
+		};
+
 		serial0: serial@20a0c0000 {
 			compatible = "apple,s5l-uart";
 			reg = <0x2 0x0a0c0000 0x0 0x4000>;
