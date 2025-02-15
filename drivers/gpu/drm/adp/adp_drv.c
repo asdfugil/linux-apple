@@ -104,7 +104,7 @@ static const struct drm_driver adp_driver = {
 	DRM_GEM_DMA_DRIVER_OPS_VMAP_WITH_DUMB_CREATE(adp_drm_gem_dumb_create),
 	.name = "adp",
 	.desc = "Apple Display Pipe DRM Driver",
-	.date = "20230412",
+	//.date = "20230412",
 	.major = 0,
 	.minor = 1,
 };
