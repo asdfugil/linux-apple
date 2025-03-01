@@ -265,6 +265,67 @@
 			#performance-domain-cells = <0>;
 		};
 
+		display: display-pipe@218000000 {
+			compatible = "apple,t8015-display-pipe", "apple,h7-display-pipe";
+			reg = <0x2 0x18000000 0x0 0xc000>,
+			      <0x2 0x18200000 0x0 0x4000>;
+			reg-names = "be", "fe";
+			power-domains = <&ps_disp0_fe>, <&ps_disp0_be>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 217 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 220 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "be", "fe";
+			iommus = <&display_dart 0>;
+			status = "disabled";
+
+			port {
+				display_adp_out_mipi: endpoint {
+					remote-endpoint = <&display_mipi_in_adp>;
+				};
+			};
+		};
+
+		display_mipi: dsi@218400000 {
+			compatible = "apple,t8015-display-pipe-mipi", "apple,h7-display-pipe-mipi";
+			reg = <0x2 0x18400000 0x0 0x100000>;
+			power-domains = <&ps_mipi_dsi>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "disabled";
+
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				display_mipi_in: port@0 {
+					reg = <0>;
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+					display_mipi_in_adp: endpoint@0 {
+						reg = <0>;
+						remote-endpoint = <&display_adp_out_mipi>;
+					};
+				};
+
+				display_mipi_out: port@1 {
+					reg = <1>;
+					#address-cells = <1>;
+					#size-cells = <0>;
+				};
+			};
+		};
+
+		display_dart: iommu@218704000 {
+			compatible = "apple,t8015-dart";
+			reg = <0x2 0x18704000 0x0 0x4000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 222 IRQ_TYPE_LEVEL_HIGH>;
+			#iommu-cells = <1>;
+			power-domains = <&ps_disp0_fe>;
+			status = "disabled";
+		};
+
 		serial0: serial@22e600000 {
 			compatible = "apple,s5l-uart";
 			reg = <0x2 0x2e600000 0x0 0x4000>;

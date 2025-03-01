@@ -11,3 +11,24 @@
 / {
 	chassis-type = "handset";
 };
+
+&display_mipi_out {
+	display_mipi_out_panel: endpoint@0 {
+		reg = <0>;
+		remote-endpoint = <&display_panel_in>;
+	};
+};
+
+&display_mipi {
+	display_panel: panel@0 {
+		compatible = "apple,summit";
+		reg = <0>;
+		max-brightness = <2047>;
+
+		port {
+			display_panel_in: endpoint {
+				remote-endpoint = <&display_mipi_out_panel>;
+			};
+		};
+	};
+};

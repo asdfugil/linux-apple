@@ -44,6 +44,18 @@
 	};
 };
 
+&display {
+	status = "okay";
+};
+
+&display_mipi {
+	status = "okay";
+};
+
+&display_dart {
+	status = "okay";
+};
+
 &serial0 {
 	status = "okay";
 };
