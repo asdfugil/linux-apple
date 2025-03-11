@@ -10,9 +10,16 @@ maintainers:
   - Hector Martin <marcan@marcan.st>
 
 description: |
-  ARM platforms using SoCs designed by Apple Inc., branded "Apple Silicon".
+  ARM platforms designed by Apple Inc., using SoCs designed by Apple,
+  branded "Apple Silicon". For older platforms, Samsung SoCs are used
+  instead.
 
-  This currently includes devices based on the "A7" SoC:
+  This currently includes devices based on the Samsung "S5L8747X" SoC:
+
+  - Lightning Digital AV Adapter
+  - Lightning VGA Adapter
+
+  Devices based on the "A7" SoC:
 
   - iPhone 5s
   - iPad Air (1)
@@ -116,6 +123,13 @@ properties:
     const: "/"
   compatible:
     oneOf:
+      - description: Samsung S5L8747X SoC based platforms
+        items:
+          - enum:
+              - apple,b137  # Lightning Digital AV Adpater
+              - apple,b165  # Lightning VGA Adapter
+          - const: samsung,s5l8747
+
       - description: Apple A7 SoC based platforms
         items:
           - enum:

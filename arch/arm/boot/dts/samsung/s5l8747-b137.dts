@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: GPL-2.0 OR MIT
+/*
+ * Apple Lightning Digital AV Adapter, B137AP, iAccy1,1
+ *
+ * Copyright (c) 2025 Nick Chan <towinchemi@gmail.com>
+ */
+
+/dts-v1/;
+
+#include "s5l8747.dtsi"
+#include "s5l8747-b1xx.dtsi"
+
+/ {
+	model = "Apple Lightning Digital AV Adapter";
+	compatible = "apple,b137", "samsung,s5l8747";
+};

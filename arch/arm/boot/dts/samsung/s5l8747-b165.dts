@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: GPL-2.0 OR MIT
+/*
+ * Apple Lightning VGA Adapter, B165AP, iAccy1,2
+ *
+ * Copyright (c) 2025 Nick Chan <towinchemi@gmail.com>
+ */
+
+/dts-v1/;
+
+#include "s5l8747.dtsi"
+#include "s5l8747-b1xx.dtsi"
+
+/ {
+	model = "Apple Lightning VGA Adapter";
+	compatible = "apple,b165", "samsung,s5l8747";
+};

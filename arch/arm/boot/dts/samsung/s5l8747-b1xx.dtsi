@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: GPL-2.0 OR MIT
+/*
+ * Parts common to all Lightning video adapters with Samsung S578747X SoC
+ *
+ * Copyright (c) 2025 Nick Chan <towinchemi@gmail.com>
+ */
+
+/ {
+	aliases {
+		serial0 = &serial0;
+		serial1 = &serial1;
+		serial2 = &serial2;
+	};
+
+	chosen {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		stdout-path = "serial2";
+	};
+
+	memory@8000000 {
+		device_type = "memory";
+		reg = <0x8000000 0x10000000>; /* To be filled by loader */
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+		/* To be filled by loader */
+	};
+};
+
+&serial0 {
+	/* Test points */
+	status = "okay";
+};
+
+&serial1 {
+	/* Female port */
+	status = "okay";
+};
+
+&serial2 {
+	/* Male port */
+	status = "okay";
+};
