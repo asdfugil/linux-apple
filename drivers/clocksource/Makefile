@@ -46,6 +46,7 @@ obj-$(CONFIG_CLKSRC_STM32_LP)	+= timer-stm32-lp.o
 obj-$(CONFIG_CLKSRC_EXYNOS_MCT)	+= exynos_mct.o
 obj-$(CONFIG_CLKSRC_LPC32XX)	+= timer-lpc32xx.o
 obj-$(CONFIG_CLKSRC_MPS2)	+= mps2-timer.o
+obj-$(CONFIG_CLKSRC_S5L8747)	+= timer-s5l8747.o
 obj-$(CONFIG_CLKSRC_SAMSUNG_PWM)	+= samsung_pwm_timer.o
 obj-$(CONFIG_FSL_FTM_TIMER)	+= timer-fsl-ftm.o
 obj-$(CONFIG_VF_PIT_TIMER)	+= timer-vf-pit.o

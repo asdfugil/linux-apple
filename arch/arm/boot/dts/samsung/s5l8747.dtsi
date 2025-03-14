@@ -49,6 +49,13 @@
 			#interrupt-cells = <1>;
 		};
 
+		timer64: timer@3c700080 {
+			compatible = "samsung,s5l8747-timer64";
+			reg = <0x3c700080 0x20>;
+			clocks = <&clkref>;
+			clock-names = "ref";
+		};
+
 		serial0: serial@3cc00000 {
 			compatible = "apple,s5l-uart";
 			reg = <0x3cc00000 0x1000>;
