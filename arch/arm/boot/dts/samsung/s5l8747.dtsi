@@ -49,6 +49,13 @@
 			#interrupt-cells = <1>;
 		};
 
+    timer0: timer@3c700000 {
+        compatible = "samsung,s5l87xx-pwm";
+        reg = <0x3c700000 0x20000>;
+        interrupt-parent = <&vic0>;
+        interrupts = <7>;
+    };
+
 		serial0: serial@3cc00000 {
 			compatible = "apple,s5l-uart";
 			reg = <0x3cc00000 0x1000>;
