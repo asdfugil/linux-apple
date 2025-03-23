@@ -42,6 +42,24 @@
 	};
 };
 
+&i2c0 {
+	status = "okay";
+
+	d2400_pmic: pmic@3c {
+		compatible = "apple,d2400", "apple,i2c-dialog";
+		reg = <0x3c>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+
+	d2401_pmic: pmic@40 {
+		compatible = "apple,d2401", "apple,i2c-dialog";
+		reg = <0x40>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+};
+
 &serial0 {
 	status = "okay";
 };
