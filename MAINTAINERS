@@ -2229,7 +2229,9 @@ F:	Documentation/devicetree/bindings/i2c/apple,i2c.yaml
 F:	Documentation/devicetree/bindings/interrupt-controller/apple,*
 F:	Documentation/devicetree/bindings/iommu/apple,dart.yaml
 F:	Documentation/devicetree/bindings/iommu/apple,sart.yaml
+F:	Documentation/devicetree/bindings/leds/backlight/apple,dialog-bl.yaml
 F:	Documentation/devicetree/bindings/leds/backlight/apple,dwi-bl.yaml
+F:	Documentation/devicetree/bindings/mfd/apple,i2c-dialog.yaml
 F:	Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml
 F:	Documentation/devicetree/bindings/net/bluetooth/brcm,bcm4377-bluetooth.yaml
 F:	Documentation/devicetree/bindings/nvme/apple,nvme-ans.yaml
@@ -2253,9 +2255,21 @@ F:	drivers/irqchip/irq-apple-aic.c
 F:	drivers/nvme/host/apple.c
 F:	drivers/nvmem/apple-efuses.c
 F:	drivers/pinctrl/pinctrl-apple-gpio.c
+F:	drivers/power/reset/apple-pmu-poweroff.c
 F:	drivers/pwm/pwm-apple.c
 F:	drivers/soc/apple/*
+<<<<<<< HEAD
 F:	drivers/video/backlight/apple_dwi_bl.c
+=======
+<<<<<<< HEAD
+=======
+F:	drivers/video/backlight/apple_dwi_bl.c
+<<<<<<< HEAD
+=======
+F:	drivers/video/backlight/apple_pmu_bl.c
+>>>>>>> 2f07d554b61d (MAINTAINERS: Add entries for Apple PMU drivers)
+>>>>>>> 411233821182 (MAINTAINERS: Add entries for Apple "Dialog" PMIC drivers)
+>>>>>>> e47f03e0424c (MAINTAINERS: Add entries for Apple "Dialog" PMIC drivers)
 F:	drivers/watchdog/apple_wdt.c
 F:	include/dt-bindings/interrupt-controller/apple-aic.h
 F:	include/dt-bindings/pinctrl/apple.h

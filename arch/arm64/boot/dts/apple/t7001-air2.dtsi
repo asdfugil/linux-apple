@@ -73,3 +73,19 @@
 &serial0 {
 	status = "okay";
 };
+
+&i2c0 {
+	status = "okay";
+
+	pmic@3c {
+		compatible = "apple,d2207", "apple,i2c-dialog";
+		reg = <0x3c>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		backlight@600 {
+			compatible = "apple,d2207-bl", "apple,d2089-bl";
+			reg = <0x600>;
+		};
+	};
+};
